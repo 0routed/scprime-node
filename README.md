@@ -23,7 +23,7 @@ for initial configuration&wallet setup launch a shell with `docker exec -it CONT
 - i have successfully moved instance-data between different nodes and switching from "normal" installations to docker containers during testing, make backups, try stuff.
 
 
-#### dockerimage available on https://hub.docker.com/repository/docker/nullrouted/scprime-node
+#### dockerimage available on https://hub.docker.com/r/nullrouted/scprime-node/tags
 
 my buildscript **`spinup.sh`**
 ```
