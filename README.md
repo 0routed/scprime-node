@@ -7,7 +7,7 @@ Dockerfile for ScPrime storage provider node.
 
 ### THIS IS NOT AN OFFICIAL SCPRIME DOCKERIMAGE. COMES AS IS, NO WARRANTY, YADAYADA... DO YOUR OWN DUE DILIGENCE ###
 
-for initial configuration launch a shell with `docker exec -it CONTAINERNAME /bin/bash` or **talk to `spc` directly with `docker exec -it CONTAINERNAME spc YOUR COMMAND`**
+for initial configuration&wallet setup launch a shell with `docker exec -it CONTAINERNAME /bin/bash` or **talk to `spc` directly with `docker exec -it CONTAINERNAME spc YOUR COMMAND`**
 
 - **`spd` runs as unprivileged user `appuser:appuser`** (`789:789`) inside the container.
 - by **default ports `4282 4283 4285`** are exposed.
