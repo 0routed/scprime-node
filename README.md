@@ -1,11 +1,18 @@
 # scprime-node
 Dockerfile for ScPrime storage provider node.
 
-1.0-rc3, 20220118
+1.0-1.6.0, 20220209
 
 *see https://scpri.me for projectdetails.*
 
 ### THIS IS NOT AN OFFICIAL SCPRIME DOCKERIMAGE. COMES AS IS, NO WARRANTY, YADAYADA... DO YOUR OWN DUE DILIGENCE ###
+
+- ## **v1.0**-1.6.0 _"yay, it didn't catch on fire"_
+  - startupscript: added auto-bootstrapping for the consensus.db for faster setup
+  - new tagging: `nullrouted/scprime-node`:`image-version`-`scprime-version` => nullrouted/scprime-node:1.0-1.6.0
+ 
+ ---
+ 
 - **`spd` runs as unprivileged user `appuser:appuser`** (`789:789`) inside the container (based on _ubuntu:20.04_).
 - by **default ports `4282 4283 4285`** are exposed.
   - supply you own with `docker run ...  -p 5282:5282 -e HA=5282 -p 5283:5283 -e SA=5283 -p 5285:5285 -e HAA=5285 ...` (if i only change the portnumber exposed to the host the grafana dashboard is sad and says port error therefore we need to change internal and external ports and pass the changed port to `spd` as well with an ENV supplied by `-e ENV=...`)
@@ -27,7 +34,7 @@ Dockerfile for ScPrime storage provider node.
 
 
 
-#### dockerimage available on https://hub.docker.com/r/nullrouted/scprime-node/tags
+#### dockerimage available on https://hub.docker.com/r/nullrouted/scprime-node/
 
 my buildscript **`spinup.sh`**
 ```
@@ -41,7 +48,7 @@ HAA=8285 #will be passed to spd in the container --host-api-addr :$HAA
 SCVERSION=1.6.0 #choose version of spd - only tested with 1.6.0
 SCTIMEZONE=Europe/Berlin # set your timezone at buildtime
 
-docker build --pull --build-arg SCVERSION=$SCVERSION --build-arg SETTZ=$SCTIMEZONE  --rm -f "Dockerfile" -t local/scprime-node:$SCVERSION "." # comment out this line if you just need an additional container
+docker build --pull --build-arg SCVERSION=$SCVERSION --build-arg SETTZ=$SCTIMEZONE  --rm -f "Dockerfile" -t local/scprime-node:1.0-$SCVERSION "." # comment out this line if you just need an additional container
 
 docker run -dt \
  -v /path/on/host/to/metadata:/home/appuser/.scprime \
@@ -53,9 +60,10 @@ docker run -dt \
  -e SA=$SA \
  -e HAA=$HAA \
  --name $NODENAME \
+ --memory=4096mb \
  --cpus=3 \
  --restart unless-stopped\
- local/scprime-node:$SCVERSION
+ local/scprime-node:1.0-$SCVERSION
 ```
 
 my **`Dockerfile`**
@@ -126,11 +134,22 @@ ENTRYPOINT ["/bin/bash","-c","~/startup.sh"]
 my startup script `./assets/scp-startup.sh` that will be copied to the container at buildtime
 ```
 #!/bin/bash
-#johndoe220117
+#johndoe220209
 
 touch .scprime/startuplog
 echo '--#-#-#--' | tee -a .scprime/startuplog
 echo $(date "+%Y-%m-%d_%H:%M:%S.%N") ': startupscript...' | tee -a .scprime/startuplog
+
+#to speedup the initial setup, if there is no consensus.db the latest version is downloaded from https://consensus.scpri.me/releases/consensus-latest.zip
+if [ ! -e ~/.scprime/consensus/consensus.db ];
+then
+   echo $(date "+%Y-%m-%d_%H:%M:%S.%N") ': no consensus.db found... bootstrapping. download can take a few minutes.' | tee -a .scprime/startuplog
+   mkdir ~/.scprime/consensus
+   curl https://consensus.scpri.me/releases/consensus-latest.zip --output ~/.scprime/consensus/latest.zip
+   echo $(date "+%Y-%m-%d_%H:%M:%S.%N") ': download done. unpacking.' | tee -a .scprime/startuplog
+   unzip ~/.scprime/consensus/latest.zip -d ~/.scprime/consensus/ | tee -a .scprime/startuplog
+   rm ~/.scprime/consensus/latest.zip
+fi
 
 #if there is a walletpassword it is loaded as environmentvariable to auto-unlock the wallet (spd only attemps auto-unlock when consensus is fully synced, takes a long time on first setup!!!)
 if [ -e .scprime/walletpassword ];
