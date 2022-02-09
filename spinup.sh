@@ -20,6 +20,7 @@ docker run -dt \
  -e SA=$SA \
  -e HAA=$HAA \
  --name $NODENAME \
+ --memory=4096mb \
  --cpus=3 \
  --restart unless-stopped\
  local/scprime-node:1.0-$SCVERSION
