@@ -8,7 +8,7 @@ HAA=8285 #will be passed to spd in the container --host-api-addr :$HAA
 SCVERSION=1.6.0 #choose version of spd - only tested with 1.6.0
 SCTIMEZONE=Europe/Berlin # set your timezone at buildtime
 
-docker build --pull --build-arg SCVERSION=$SCVERSION --build-arg SETTZ=$SCTIMEZONE  --rm -f "Dockerfile" -t local/scprime-node:$SCVERSION "." # comment out this line if you just need an additional container
+docker build --pull --build-arg SCVERSION=$SCVERSION --build-arg SETTZ=$SCTIMEZONE  --rm -f "Dockerfile" -t local/scprime-node:1.0-$SCVERSION "." # comment out this line if you just need an additional container
 
 docker run -dt \
  -v /path/on/host/to/metadata:/home/appuser/.scprime \
@@ -22,4 +22,4 @@ docker run -dt \
  --name $NODENAME \
  --cpus=3 \
  --restart unless-stopped\
- local/scprime-node:$SCVERSION
+ local/scprime-node:1.0-$SCVERSION
